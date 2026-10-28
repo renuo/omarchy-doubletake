@@ -6,7 +6,7 @@ Click the AirPlay icon:
 
 - **On/off:** the switch in the panel's header starts and stops the doubletake daemon. It stays that way after you log in again (`systemctl --user enable --now` / `disable --now`). While it's off, the daemon isn't running and the icon is dimmed; the widget only asks systemd for the switch's state, every 30 s. Right-click the icon to flip the switch; turning it off also stops any sharing.
 - **Not sharing:** the panel lists the receivers on your network, **Paired** first, then **Not paired**. Within each, Apple TVs come first and Macs (MacBook, iMac, Mac mini, …) last. Click a paired receiver and it connects right away. A receiver that is not paired asks *Pair first?*. Click **Pair**, then type the code the receiver shows (or its AirPlay password, if it has one set).
-- **Choosing the screen:** the first time you share to a receiver, Omarchy's share picker asks which screen to send. Keep *restore* ticked (Omarchy's default) and doubletake remembers your choice for that receiver, so after that, sharing starts without asking.
+- **Choosing the screen:** the first time you share to a receiver, Omarchy's share picker asks which screen to send. Keep *restore* ticked (Omarchy's default) and doubletake remembers your choice for that receiver, so after that, sharing starts without asking. For now only a whole screen works: sharing a window or a region doesn't.
 - **Sharing:** the icon turns red and the panel has a single **Stop sharing** button.
 
 The panel closes once a connection starts, so that it doesn't cover the share picker or hold on to the keyboard. It opens again when the receiver asks for a code, or when the connection fails.
@@ -64,3 +64,7 @@ ctl.sh stop          # stop every stream
 ```
 
 `doubletake-ctl` accepts the code only as a command-line argument. So for the moment the call runs, the code is visible in the process list.
+
+## Copyright
+
+Copyright (c) 2026 [Renuo AG](https://www.renuo.ch). Released under the [MIT License](LICENSE).
