@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Stands in for doubletake-ctl: records its argv and
+# answers from $FAKE_DT_DIR/<command>.json. A missing file means the daemon is
+# unreachable.
+
+echo "$*" >>"$FAKE_DT_ARGS"
+reply="$FAKE_DT_DIR/${1:-none}.json"
+if [[ ! -f $reply ]]; then
+  echo "error: connect to daemon: dial unix: no such file or directory" >&2
+  exit 1
+fi
+cat "$reply"
+jq -e '.ok' "$reply" >/dev/null

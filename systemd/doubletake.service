@@ -1,0 +1,13 @@
+[Unit]
+Description=doubletake AirPlay mirroring daemon
+Documentation=man:doubletake(1)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=@DOUBLETAKE@ -daemonize
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

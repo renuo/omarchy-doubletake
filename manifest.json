@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "renuo.doubletake",
+  "name": "doubletake",
+  "version": "1.0.0",
+  "author": "Renuo AG",
+  "license": "MIT",
+  "description": "Share your screen to an AirPlay receiver with doubletake.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "AirPlay",
+    "description": "Pick a receiver to mirror your first screen to it, and stop sharing again.",
+    "category": "Display",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Stands in for systemctl --user: the unit counts as enabled while
+# $FAKE_DT_DIR/enabled exists. $FAKE_SYSTEMCTL_FAIL makes enable/disable fail.
+
+echo "$*" >>"$FAKE_SYSTEMCTL_ARGS"
+[[ $1 == --user ]] || exit 1
+case "$2" in
+is-enabled) [[ -f $FAKE_DT_DIR/enabled ]] ;;
+enable | disable)
+  if [[ -n ${FAKE_SYSTEMCTL_FAIL:-} ]]; then
+    echo "$FAKE_SYSTEMCTL_FAIL" >&2
+    exit 1
+  fi
+  if [[ $2 == enable ]]; then touch "$FAKE_DT_DIR/enabled"; else rm -f "$FAKE_DT_DIR/enabled"; fi
+  ;;
+*) exit 1 ;;
+esac
