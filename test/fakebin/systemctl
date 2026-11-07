@@ -14,5 +14,6 @@ enable | disable)
   fi
   if [[ $2 == enable ]]; then touch "$FAKE_DT_DIR/enabled"; else rm -f "$FAKE_DT_DIR/enabled"; fi
   ;;
+daemon-reload | try-restart) ;;
 *) exit 1 ;;
 esac
