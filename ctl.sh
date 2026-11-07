@@ -22,8 +22,7 @@ usage() {
 
 doubletake_ctl() {
   local bin=${DOUBLETAKE_CTL:-}
-  [[ -n $bin ]] || bin=$(command -v doubletake-ctl || true)
-  [[ -n $bin ]] || bin=$HOME/.local/bin/doubletake-ctl
+  [[ -n $bin ]] || bin=doubletake-ctl
   timeout 10 "$bin" "$@"
 }
 

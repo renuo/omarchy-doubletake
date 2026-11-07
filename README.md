@@ -21,9 +21,10 @@ bin/install
 
 This installs:
 
-1. doubletake from the AUR, unless `doubletake` is already on `PATH` or in `~/.local/bin`.
-2. `~/.config/systemd/user/doubletake.service`, which runs `doubletake -daemonize` with the graphical session. Installing doesn't enable or start it; that's the panel's switch. A daemon that is already running is restarted, so it picks up a new binary.
-3. The plugin itself, copied to `~/.config/omarchy/plugins/renuo.doubletake/`, and added to the bar.
+1. The `doubletake` package from the AUR, unless it is installed already. It ships `doubletake.service`, which runs `doubletake -daemonize` with the graphical session. Installing doesn't enable or start it; that's the panel's switch. A daemon that is already running is restarted, so it picks up a new binary.
+2. The plugin itself, copied to `~/.config/omarchy/plugins/renuo.doubletake/`, and added to the bar.
+
+Earlier versions wrote their own `~/.config/systemd/user/doubletake.service`. It hides the package's unit, so installing removes it and keeps the switch as it was.
 
 It does not change your Hyprland or portal configuration.
 
@@ -40,8 +41,8 @@ Some things to know:
 
 ```bash
 systemctl --user disable --now doubletake.service
-rm ~/.config/systemd/user/doubletake.service
 omarchy plugin remove renuo.doubletake
+omarchy pkg drop doubletake
 ```
 
 ## Development
