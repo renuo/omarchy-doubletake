@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Installs doubletake and its daemon unit, then installs and enables this
-# plugin. The daemon itself stays off until it is switched on in the panel.
+# Installs doubletake from the AUR, whose package ships the daemon's user unit,
+# then installs and enables this plugin. The daemon itself stays off until it is switched on in the panel.
 #
 # A copy rather than a symlink on purpose: the shell watches the plugin
 # directory with `inotifywait -r`, which does not descend into symlinked
@@ -13,17 +13,30 @@ set -euo pipefail
 PLUGIN_ID="renuo.doubletake"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_DIR="$HOME/.config/omarchy/plugins/$PLUGIN_ID"
-CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-UNIT_DIR="$CONFIG_HOME/systemd/user"
+UNIT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 
 fail() {
   echo "install: $*" >&2
   exit 1
 }
 
-find_doubletake() {
-  command -v doubletake 2>/dev/null ||
-    { [[ -x $HOME/.local/bin/doubletake ]] && echo "$HOME/.local/bin/doubletake"; }
+packaged() {
+  pacman -Q doubletake >/dev/null 2>&1
+}
+
+# Earlier installs wrote their own unit with the binary's absolute path. It
+# shadows the package's unit, so it goes, and the panel's switch keeps its state.
+remove_unit_of_earlier_install() {
+  local unit=$UNIT_DIR/doubletake.service enabled=false
+  grep -qx 'Description=doubletake AirPlay mirroring daemon' "$unit" 2>/dev/null || return 0
+  systemctl --user is-enabled --quiet doubletake.service 2>/dev/null && enabled=true
+  systemctl --user disable doubletake.service >/dev/null 2>&1 || true
+  rm "$unit"
+  systemctl --user daemon-reload
+  if $enabled; then
+    systemctl --user enable doubletake.service
+  fi
+  echo "removed $unit, the doubletake package ships the unit now"
 }
 
 command -v omarchy-plugin-validate >/dev/null 2>&1 ||
@@ -31,19 +44,14 @@ command -v omarchy-plugin-validate >/dev/null 2>&1 ||
 
 omarchy-plugin-validate "$SOURCE_DIR" || fail "manifest validation failed"
 
-doubletake=$(find_doubletake) || {
-  omarchy pkg aur add doubletake
-  doubletake=$(find_doubletake) || fail "doubletake is not installed"
-}
+packaged || omarchy pkg aur add doubletake
+packaged || fail "doubletake is not installed"
 
-# systemd does not search ~/.local/bin, so the unit gets the absolute path.
-mkdir -p "$UNIT_DIR"
-sed "s|@DOUBLETAKE@|$doubletake|" "$SOURCE_DIR/systemd/doubletake.service" >"$UNIT_DIR/doubletake.service"
+remove_unit_of_earlier_install
 systemctl --user daemon-reload
 # Whether it runs is the panel's switch, so only a running daemon is touched,
 # to pick up a new binary.
 systemctl --user try-restart doubletake.service
-echo "installed doubletake.service ($doubletake) -> $UNIT_DIR"
 
 mkdir -p "$TARGET_DIR"
 
@@ -51,14 +59,13 @@ if command -v rsync >/dev/null 2>&1; then
   rsync -a --delete \
     --exclude '.*' \
     --exclude 'bin' \
-    --exclude 'systemd' \
     --exclude 'test' \
     "$SOURCE_DIR"/ "$TARGET_DIR"/
 else
   rm -rf "${TARGET_DIR:?}"/*
   for entry in "$SOURCE_DIR"/*; do
     case "${entry##*/}" in
-    bin | systemd | test) continue ;;
+    bin | test) continue ;;
     esac
     cp -r "$entry" "$TARGET_DIR"/
   done
